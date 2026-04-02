@@ -1,4 +1,4 @@
 @NullMarked
-package io.github.sinri.stark.logging.format;
+package io.github.sinri.stark.logging.base;
 
 import org.jspecify.annotations.NullMarked;
