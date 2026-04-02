@@ -6,18 +6,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 调用堆栈渲染规范。
+ * Stack trace rendering specification.
  * <p>
- * 用于控制异常堆栈渲染时哪些包前缀可以被折叠/忽略，从而让关键信息更突出。
+ * Controls which package prefixes can be folded/ignored when rendering exception stack traces,
+ * so that key information stands out.
  *
  * @since 5.0.0
  */
 @NullMarked
 public final class LoggingStackSpecification {
     /**
-     * 渲染异常调用堆栈时可忽略的包名前缀集合。
+     * Set of package name prefixes that can be ignored when rendering exception stack traces.
      * <p>
-     * 可按需修改其中元素。
+     * Elements can be modified as needed.
      */
     public static final Set<String> IgnorableCallStackPackageSet;
 

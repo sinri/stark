@@ -21,30 +21,30 @@ public class PlainLogRender implements LogRender<String> {
     }
 
     /**
-     * 渲染日志的分类信息为字符串。
+     * Render log classification as a string.
      *
-     * @param classification 日志的分类信息
-     * @return 渲染后的分类信息字符串
+     * @param classification the log classification list
+     * @return the rendered classification string
      */
     public String renderClassification(List<String> classification) {
         return String.join(",", classification);
     }
 
     /**
-     * 渲染日志的异常信息为字符串。
+     * Render a throwable as a string.
      *
-     * @param throwable 日志对应的异常对象
-     * @return 渲染后的异常信息字符串
+     * @param throwable the throwable to render
+     * @return the rendered throwable string
      */
     public String renderThrowable(Throwable throwable) {
         return ThrowableRender.renderThrowableChain(throwable);
     }
 
     /**
-     * 渲染日志的上下文信息为字符串。
+     * Render log context as a string.
      *
-     * @param context 日志的上下文信息
-     * @return 渲染后的上下文信息字符串
+     * @param context the log context map
+     * @return the rendered context string
      */
     public String renderContext(Map<String, @Nullable Object> context) {
         return context.entrySet().stream()
@@ -53,11 +53,11 @@ public class PlainLogRender implements LogRender<String> {
     }
 
     /**
-     * 渲染日志为字符串。
+     * Render a log entry as a plain text string.
      *
-     * @param topic 主题
-     * @param log   日志
-     * @return 日志经渲染后的字符串
+     * @param topic the log topic
+     * @param log   the log entry
+     * @return the rendered log string
      */
     @Override
     public String render(String topic, Log log) {

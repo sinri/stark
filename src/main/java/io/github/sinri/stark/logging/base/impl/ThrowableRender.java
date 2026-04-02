@@ -7,30 +7,31 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * 异常链渲染工具类。
+ * Utility class for rendering throwable cause chains.
  * <p>
- * 用于将异常对象及其 cause 链渲染为可读文本，同时支持对部分调用堆栈包前缀进行折叠。
+ * Renders a throwable and its cause chain as readable text, with support for folding
+ * stack trace entries from ignorable package prefixes.
  *
  * @since 5.0.0
  */
 public class ThrowableRender {
 
     /**
-     * 渲染异常链。
+     * Render a throwable cause chain using the default ignorable package set.
      *
-     * @param throwable 异常对象（可为空）
-     * @return 渲染后的异常链文本；若 throwable 为空则返回空字符串
+     * @param throwable the throwable to render (may be null)
+     * @return the rendered cause chain text; empty string if throwable is null
      */
     public static String renderThrowableChain(@Nullable Throwable throwable) {
         return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackageSet);
     }
 
     /**
-     * 渲染异常链，并允许指定可忽略的调用堆栈包前缀集合。
+     * Render a throwable cause chain with a custom set of ignorable package prefixes.
      *
-     * @param throwable                异常对象（可为空）
-     * @param ignorableStackPackageSet 可忽略的调用堆栈包前缀集合
-     * @return 渲染后的异常链文本；若 throwable 为空则返回空字符串
+     * @param throwable                the throwable to render (may be null)
+     * @param ignorableStackPackageSet package prefixes whose stack frames should be folded
+     * @return the rendered cause chain text; empty string if throwable is null
      */
     public static String renderThrowableChain(@Nullable Throwable throwable, Set<String> ignorableStackPackageSet) {
         if (throwable == null) return "";
