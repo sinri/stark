@@ -3,6 +3,7 @@ package io.github.sinri.stark.logging.base;
 import io.github.sinri.stark.core.DataEntity;
 import io.vertx.core.json.JsonObject;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.event.Level;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +48,10 @@ public class Log extends DataEntity {
     public final Log setLevel(String level) {
         put(LEVEL, level);
         return this;
+    }
+
+    public final Log setLevel(Level level) {
+        return setLevel(level.name());
     }
 
     public final @Nullable JsonObject getContext() {
