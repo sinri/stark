@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicReference;
 public interface LoggerFactory {
     AtomicReference<LoggerFactory> _UNIVERSAL_INSTANCE = new AtomicReference<>(new StdoutLoggerFactory(new StdoutLogProcesser()));
 
-    static LoggerFactory getUniversalLoggerFactory() {
+    static LoggerFactory universal() {
         return _UNIVERSAL_INSTANCE.get();
     }
 
-    static void setUniversalLoggerFactory(LoggerFactory loggerFactory) {
+    static void universal(LoggerFactory loggerFactory) {
         _UNIVERSAL_INSTANCE.set(loggerFactory);
     }
 
