@@ -9,14 +9,14 @@ import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PlainLogProcesserTest {
+class StdoutLogProcesserTest {
 
     @Test
     void processReturnNullForSynchronous() {
         Log log = new Log();
         log.setMessage("sync test");
 
-        Future<Void> result = PlainLogProcesser.INSTANCE.process("TestTopic", log);
+        Future<Void> result = new StdoutLogProcesser().process("TestTopic", log);
         assertNull(result, "synchronous processing should return null");
     }
 
@@ -29,7 +29,7 @@ class PlainLogProcesserTest {
 
             Log log = new Log();
             log.setMessage("captured message");
-            PlainLogProcesser.INSTANCE.process("CapturedTopic", log);
+            new StdoutLogProcesser().process("CapturedTopic", log);
 
             String output = captured.toString();
             assertTrue(output.contains("captured message"), "stdout should contain the log message");
@@ -38,10 +38,5 @@ class PlainLogProcesserTest {
         } finally {
             System.setOut(originalOut);
         }
-    }
-
-    @Test
-    void singletonInstance() {
-        assertSame(PlainLogProcesser.INSTANCE, PlainLogProcesser.INSTANCE);
     }
 }

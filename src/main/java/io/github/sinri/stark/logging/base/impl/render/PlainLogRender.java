@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PlainLogRender implements LogRender<String> {
-    public static final PlainLogRender INSTANCE = new PlainLogRender();
+    // public static final PlainLogRender INSTANCE = new PlainLogRender();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX");
 
-    private PlainLogRender() {
+    public PlainLogRender() {
     }
 
     /**

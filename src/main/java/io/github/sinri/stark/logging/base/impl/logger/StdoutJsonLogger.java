@@ -2,17 +2,18 @@ package io.github.sinri.stark.logging.base.impl.logger;
 
 import io.github.sinri.stark.logging.base.LogProcesser;
 import io.github.sinri.stark.logging.base.impl.processor.StdoutLogProcesser;
+import io.github.sinri.stark.logging.base.impl.render.JsonObjectLogRender;
 
-public class StdoutPlainLogger extends StdoutLogger {
+public class StdoutJsonLogger extends StdoutLogger {
     private final LogProcesser logProcesser;
 
-    public StdoutPlainLogger(String topic) {
+    public StdoutJsonLogger(String topic) {
         super(topic);
-        logProcesser = new StdoutLogProcesser();
+        logProcesser = new StdoutLogProcesser(new JsonObjectLogRender());
     }
 
     @Override
-    protected LogProcesser getLogProcesser() {
+    public LogProcesser getLogProcesser() {
         return logProcesser;
     }
 }

@@ -31,13 +31,19 @@ public class AliyunSLSLogPutter implements Closeable {
     private final WebClient webClient;
     private final String endpoint;
     private final Logger logger;
+    private final String source;
 
-    public AliyunSLSLogPutter(Vertx vertx, String accessKeyId, String accessKeySecret, String endpoint) {
+    public AliyunSLSLogPutter(Vertx vertx, String accessKeyId, String accessKeySecret, String endpoint,@Nullable String configuredSourceExpression) {
         this.accessKeyId = accessKeyId;
         this.accessKeySecret = accessKeySecret;
         this.webClient = WebClient.create(vertx);
         this.endpoint = endpoint;
         this.logger = new StdoutPlainLogger(this.getClass().getName());
+        this.source = buildSource(configuredSourceExpression);
+    }
+
+    public String getSource() {
+        return source;
     }
 
     /**
