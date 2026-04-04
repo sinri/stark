@@ -1,13 +1,24 @@
 package io.github.sinri.stark.logging.slf4j;
 
 import io.github.sinri.stark.logging.base.Log;
+import io.github.sinri.stark.logging.base.Logger;
 import io.github.sinri.stark.logging.base.LoggerFactory;
-import org.slf4j.helpers.MarkerIgnoringBase;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Marker;
+import org.slf4j.event.Level;
+import org.slf4j.helpers.AbstractLogger;
 import org.slf4j.helpers.MessageFormatter;
 
-public class StarkSlf4jLogger extends MarkerIgnoringBase {
+import java.io.Serial;
+
+public class StarkSlf4jLogger extends AbstractLogger {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    private final Logger embeddedLogger;
+
     public StarkSlf4jLogger(String name) {
         this.name = name;
+        this.embeddedLogger = LoggerFactory.universal().createLogger(name);
     }
 
     @Override
@@ -16,28 +27,8 @@ public class StarkSlf4jLogger extends MarkerIgnoringBase {
     }
 
     @Override
-    public void trace(String msg) {
-        log(org.slf4j.event.Level.TRACE, msg);
-    }
-
-    @Override
-    public void trace(String format, Object arg) {
-        log(org.slf4j.event.Level.TRACE, format, arg);
-    }
-
-    @Override
-    public void trace(String format, Object arg1, Object arg2) {
-        log(org.slf4j.event.Level.TRACE, format, arg1, arg2);
-    }
-
-    @Override
-    public void trace(String format, Object... arguments) {
-        log(org.slf4j.event.Level.TRACE, format, arguments);
-    }
-
-    @Override
-    public void trace(String msg, Throwable t) {
-        log(org.slf4j.event.Level.TRACE, msg, t);
+    public boolean isTraceEnabled(Marker marker) {
+        return true;
     }
 
     @Override
@@ -46,28 +37,8 @@ public class StarkSlf4jLogger extends MarkerIgnoringBase {
     }
 
     @Override
-    public void debug(String msg) {
-        log(org.slf4j.event.Level.DEBUG, msg);
-    }
-
-    @Override
-    public void debug(String format, Object arg) {
-        log(org.slf4j.event.Level.DEBUG, format, arg);
-    }
-
-    @Override
-    public void debug(String format, Object arg1, Object arg2) {
-        log(org.slf4j.event.Level.DEBUG, format, arg1, arg2);
-    }
-
-    @Override
-    public void debug(String format, Object... arguments) {
-        log(org.slf4j.event.Level.DEBUG, format, arguments);
-    }
-
-    @Override
-    public void debug(String msg, Throwable t) {
-        log(org.slf4j.event.Level.DEBUG, msg, t);
+    public boolean isDebugEnabled(Marker marker) {
+        return true;
     }
 
     @Override
@@ -76,28 +47,8 @@ public class StarkSlf4jLogger extends MarkerIgnoringBase {
     }
 
     @Override
-    public void info(String msg) {
-        log(org.slf4j.event.Level.INFO, msg);
-    }
-
-    @Override
-    public void info(String format, Object arg) {
-        log(org.slf4j.event.Level.INFO, format, arg);
-    }
-
-    @Override
-    public void info(String format, Object arg1, Object arg2) {
-        log(org.slf4j.event.Level.INFO, format, arg1, arg2);
-    }
-
-    @Override
-    public void info(String format, Object... arguments) {
-        log(org.slf4j.event.Level.INFO, format, arguments);
-    }
-
-    @Override
-    public void info(String msg, Throwable t) {
-        log(org.slf4j.event.Level.INFO, msg, t);
+    public boolean isInfoEnabled(Marker marker) {
+        return true;
     }
 
     @Override
@@ -106,28 +57,8 @@ public class StarkSlf4jLogger extends MarkerIgnoringBase {
     }
 
     @Override
-    public void warn(String msg) {
-        log(org.slf4j.event.Level.WARN, msg);
-    }
-
-    @Override
-    public void warn(String format, Object arg) {
-        log(org.slf4j.event.Level.WARN, format, arg);
-    }
-
-    @Override
-    public void warn(String format, Object arg1, Object arg2) {
-        log(org.slf4j.event.Level.WARN, format, arg1, arg2);
-    }
-
-    @Override
-    public void warn(String format, Object... arguments) {
-        log(org.slf4j.event.Level.WARN, format, arguments);
-    }
-
-    @Override
-    public void warn(String msg, Throwable t) {
-        log(org.slf4j.event.Level.WARN, msg, t);
+    public boolean isWarnEnabled(Marker marker) {
+        return true;
     }
 
     @Override
@@ -136,56 +67,41 @@ public class StarkSlf4jLogger extends MarkerIgnoringBase {
     }
 
     @Override
-    public void error(String msg) {
-        log(org.slf4j.event.Level.ERROR, msg);
+    public boolean isErrorEnabled(Marker marker) {
+        return true;
     }
 
     @Override
-    public void error(String format, Object arg) {
-        log(org.slf4j.event.Level.ERROR, format, arg);
+    protected @Nullable String getFullyQualifiedCallerName() {
+        return null;
     }
 
     @Override
-    public void error(String format, Object arg1, Object arg2) {
-        log(org.slf4j.event.Level.ERROR, format, arg1, arg2);
-    }
-
-    @Override
-    public void error(String format, Object... arguments) {
-        log(org.slf4j.event.Level.ERROR, format, arguments);
-    }
-
-    @Override
-    public void error(String msg, Throwable t) {
-        log(org.slf4j.event.Level.ERROR, msg, t);
-    }
-
-    private void log(org.slf4j.event.Level level, String message) {
+    protected void handleNormalizedLoggingCall(
+            Level level,
+            @Nullable Marker marker,
+            String msg,
+            @Nullable Object @Nullable [] args,
+            @Nullable Throwable throwable) {
+        String message;
+        Throwable t = throwable;
+        if (args != null && args.length > 0) {
+            var tuple = MessageFormatter.arrayFormat(msg, args);
+            message = tuple.getMessage();
+            if (t == null) {
+                t = tuple.getThrowable();
+            }
+        } else {
+            message = msg;
+        }
         Log log = new Log()
                 .setLevel(level)
-                .setMessage(String.valueOf(message));
-        targetLogger().log(log);
+                .setMessage(message)
+                .setThrowable(t);
+        getEmbeddedLogger().log(log);
     }
 
-    private void log(org.slf4j.event.Level level, String message, Throwable throwable) {
-        Log log = new Log()
-                .setLevel(level)
-                .setMessage(String.valueOf(message))
-                .setThrowable(throwable);
-        targetLogger().log(log);
-    }
-
-    private void log(org.slf4j.event.Level level, String pattern, Object... arguments) {
-        var tuple = MessageFormatter.arrayFormat(pattern, arguments);
-        Log log = new Log()
-                .setLevel(level)
-                .setMessage(String.valueOf(tuple.getMessage()))
-                .setThrowable(tuple.getThrowable());
-        targetLogger().log(log);
-    }
-
-    private io.github.sinri.stark.logging.base.Logger targetLogger() {
-        return LoggerFactory.universal().createLogger(name);
+    protected Logger getEmbeddedLogger() {
+        return embeddedLogger;
     }
 }
-
