@@ -1,31 +1,24 @@
 package io.github.sinri.stark.database.mysql;
 
-import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.PoolOptions;
 import io.vertx.sqlclient.SqlConnectOptions;
+import org.jspecify.annotations.Nullable;
 
 public interface StarkMySQLPool extends Pool {
-    /**
-     * Like {@link #pool(SqlConnectOptions, PoolOptions)} with default options.
-     */
-    static Pool pool(SqlConnectOptions connectOptions) {
-        return pool(connectOptions, new PoolOptions());
+
+    static @Nullable Pool registered(String poolName) {
+        return StarkMySQLPoolImpl.POOL_MAP.get(poolName);
     }
 
-    /**
-     * Like {@link #pool(Vertx, SqlConnectOptions, PoolOptions)} with a Vert.x instance created automatically.
-     */
-    static Pool pool(SqlConnectOptions database, PoolOptions options) {
-        Context context = Vertx.currentContext();
-        if (context != null) {
-            return pool(context.owner(), database, options);
-        }
-        throw new IllegalStateException("Vert.x is not initialized.");
+    static void register(String poolName, Pool pool) {
+        StarkMySQLPoolImpl.POOL_MAP.put(poolName, pool);
     }
 
-    static Pool pool(Vertx vertx, SqlConnectOptions database, PoolOptions options) {
-        return new StarkMySQLPoolImpl(vertx, database, options);
+    static Pool create(Vertx vertx, String poolName, SqlConnectOptions sqlConnectOptions, PoolOptions options) {
+        Pool pool = new StarkMySQLPoolImpl(vertx, sqlConnectOptions, options);
+        register(poolName, pool);
+        return pool;
     }
 }

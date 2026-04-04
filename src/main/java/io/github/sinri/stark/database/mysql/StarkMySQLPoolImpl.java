@@ -5,7 +5,12 @@ import io.vertx.core.Vertx;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.sqlclient.*;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 class StarkMySQLPoolImpl implements StarkMySQLPool {
+    final static Map<String, Pool> POOL_MAP = new ConcurrentHashMap<>();
+
     private final Pool embeddedPool;
 
     public StarkMySQLPoolImpl(Vertx vertx, SqlConnectOptions connectOptions, PoolOptions poolOptions) {
