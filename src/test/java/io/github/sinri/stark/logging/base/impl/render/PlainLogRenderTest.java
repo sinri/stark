@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PlainLogRenderTest {
 
-    private final PlainLogRender render = PlainLogRender.INSTANCE;
+    private final PlainLogRender render = new PlainLogRender();
 
     @Test
     void renderBasicLog() {
@@ -125,7 +125,11 @@ class PlainLogRenderTest {
     }
 
     @Test
-    void singletonInstance() {
-        assertSame(PlainLogRender.INSTANCE, PlainLogRender.INSTANCE);
+    void canCreateMultipleInstances() {
+        PlainLogRender r1 = new PlainLogRender();
+        PlainLogRender r2 = new PlainLogRender();
+        assertNotNull(r1);
+        assertNotNull(r2);
+        assertNotSame(r1, r2);
     }
 }

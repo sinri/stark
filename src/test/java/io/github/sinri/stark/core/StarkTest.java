@@ -3,7 +3,6 @@ package io.github.sinri.stark.core;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.internal.VertxBootstrap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ class StarkTest {
 
     @BeforeEach
     void setUp() {
-        vertx = VertxBootstrap.create().init().vertx();
+        vertx = Vertx.vertx();
         stark = new Stark(vertx);
     }
 
