@@ -11,6 +11,8 @@ import java.util.function.Function;
 
 /**
  * Stark 体系下的标准 Verticle 基类，实现接口 {@link StarkVerticle}，期望部署于 {@link Stark} 所实现的 {@link  Vertx} 实例下。
+ * <p>
+ * 本类的每个实例仅运行一次，不能重复 deploy。
  *
  * @since 5.0.0
  */

@@ -4,6 +4,7 @@ import io.github.sinri.stark.component.verticles.StarkVerticleBase;
 import io.github.sinri.stark.core.LateObject;
 import io.github.sinri.stark.core.Stark;
 import io.github.sinri.stark.logging.base.Logger;
+import io.github.sinri.stark.logging.base.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -11,12 +12,16 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 
-public abstract class StarkWebServer extends StarkVerticleBase {
+public abstract class HTTPService extends StarkVerticleBase {
     private final Logger httpServerLogger;
     private final LateObject<HttpServer> lateHttpServer = new LateObject<>();
 
-    public StarkWebServer(HttpServerOptions httpServerOptions, Logger httpServerLogger) {
+    public HTTPService(Logger httpServerLogger) {
         this.httpServerLogger = httpServerLogger;
+    }
+
+    public HTTPService() {
+        this(LoggerFactory.universal().createLogger(HTTPService.class));
     }
 
     protected abstract HttpServerOptions buildHttpServerOptions();

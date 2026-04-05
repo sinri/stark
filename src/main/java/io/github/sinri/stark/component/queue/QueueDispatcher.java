@@ -4,6 +4,7 @@ import io.github.sinri.stark.component.verticles.StarkVerticleBase;
 import io.github.sinri.stark.core.LateObject;
 import io.github.sinri.stark.core.Stark;
 import io.github.sinri.stark.logging.base.Logger;
+import io.github.sinri.stark.logging.base.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -28,6 +29,10 @@ public abstract class QueueDispatcher extends StarkVerticleBase
     public QueueDispatcher(Logger queueManageLogger) {
         super();
         this.queueManageLogger = queueManageLogger;
+    }
+
+    public QueueDispatcher() {
+        this(LoggerFactory.universal().createLogger(QueueDispatcher.class));
     }
 
     @Override

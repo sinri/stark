@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
  * @since 5.0.0
  */
 @NullMarked
-public class StarkCronExpression {
+public class CronExpression {
     final Set<Integer> minuteOptions = new HashSet<>();
     final Set<Integer> hourOptions = new HashSet<>();
     final Set<Integer> dayOptions = new HashSet<>();
@@ -40,7 +40,7 @@ public class StarkCronExpression {
      *                          values)
      * @see <a href="https://man7.org/linux/man-pages/man5/crontab.5.html">...</a>
      */
-    public StarkCronExpression(String rawCronExpression) {
+    public CronExpression(String rawCronExpression) {
         this.rawCronExpression = rawCronExpression;
 
         String[] parts = rawCronExpression.trim().split("\\s+");

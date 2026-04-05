@@ -17,4 +17,8 @@ public interface LoggerFactory {
     }
 
     Logger createLogger(String topic);
+
+    default Logger createLogger(Class<?> clazz) {
+        return createLogger(clazz.getName());
+    }
 }

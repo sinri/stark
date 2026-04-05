@@ -1,10 +1,11 @@
 package io.github.sinri.stark.component.sundial;
 
+import io.github.sinri.stark.component.sundial.cron.CronExpression;
 import io.github.sinri.stark.component.sundial.cron.ParsedCalenderElements;
-import io.github.sinri.stark.component.sundial.cron.StarkCronExpression;
 import io.github.sinri.stark.component.verticles.StarkVerticleBase;
 import io.github.sinri.stark.core.Stark;
 import io.github.sinri.stark.logging.base.Logger;
+import io.github.sinri.stark.logging.base.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -14,7 +15,6 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 
 /**
@@ -25,15 +25,19 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class Sundial extends StarkVerticleBase {
+public abstract class CronJobDispatcher extends StarkVerticleBase {
 
-    private final Map<String, SundialPlan> planMap = new ConcurrentHashMap<>();
+    private final Map<String, CronJobPlan> planMap = new ConcurrentHashMap<>();
+    private final Logger logger;
     private @Nullable Long timerID;
-    private @Nullable Logger logger;
 
-    public Sundial(Logger logger) {
+    public CronJobDispatcher(Logger logger) {
         super();
         this.logger = logger;
+    }
+
+    public CronJobDispatcher() {
+        this(LoggerFactory.universal().createLogger(CronJobDispatcher.class));
     }
 
     public final Logger getLogger() {
@@ -42,7 +46,7 @@ public abstract class Sundial extends StarkVerticleBase {
 
     @Override
     protected Future<Void> startVerticle() {
-        int delaySeconds = 61 - StarkCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
+        int delaySeconds = 61 - CronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = getStark().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
             refreshPlans();
@@ -63,31 +67,19 @@ public abstract class Sundial extends StarkVerticleBase {
                         )
                 );
 
-                StarkVerticleBase.wrap(new Function<StarkVerticleBase, Future<?>>() {
-                                     @Override
-                                     public Future<?> apply(StarkVerticleBase starkVerticleBase) {
-                                         return plan.execute(
-                                                 starkVerticleBase.getStark(),
-                                                 now,
-                                                 getLogger()
-                                         );
-                                     }
-                                 })
-                                 .deployMe(getStark(), new DeploymentOptions()
-                                         .setThreadingModel(plan.expectedThreadingModel())
-                                 )
-                                 .onComplete(ar -> {
-                                     if (ar.failed()) {
-                                         getLogger().error(log -> log
-                                                 .setThrowable(ar.cause())
-                                                 .setMessage("Failed to deploy verticle for " + plan.key())
-                                         );
-                                     } else {
-                                         getLogger().info(log -> log
-                                                 .setMessage("Deployed verticle for " + plan.key() + " as " + ar.result())
-                                         );
-                                     }
-                                 });
+                plan.triggerVerticle(getStark(), now)
+                    .onComplete(ar -> {
+                        if (ar.failed()) {
+                            getLogger().error(log -> log
+                                    .setThrowable(ar.cause())
+                                    .setMessage("Failed to deploy verticle for " + plan.key())
+                            );
+                        } else {
+                            getLogger().info(log -> log
+                                    .setMessage("Deployed verticle for " + plan.key() + " as " + ar.result())
+                            );
+                        }
+                    });
             } else {
                 getLogger().debug(x -> x
                         .setMessage("Sundial Plan Not Match")
@@ -133,7 +125,7 @@ public abstract class Sundial extends StarkVerticleBase {
      *
      * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
-    abstract protected Future<@Nullable Collection<SundialPlan>> fetchPlans();
+    abstract protected Future<@Nullable Collection<CronJobPlan>> fetchPlans();
 
     @Override
     protected Future<Void> stopVerticle() {
