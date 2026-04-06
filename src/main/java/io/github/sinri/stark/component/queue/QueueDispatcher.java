@@ -10,6 +10,8 @@ import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import org.jspecify.annotations.NullMarked;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * 队列服务实现。
@@ -25,6 +27,7 @@ public abstract class QueueDispatcher extends StarkVerticleBase
     private final Logger queueManageLogger;
     private final LateObject<QueueWorkerPoolManager> lateQueueWorkerPoolManager = new LateObject<>();
     private QueueStatus queueStatus = QueueStatus.INIT;
+    private final AtomicReference<Long> nextRoutineTimerIdRef = new AtomicReference<>();
 
     public QueueDispatcher(Logger queueManageLogger) {
         super();
@@ -45,6 +48,9 @@ public abstract class QueueDispatcher extends StarkVerticleBase
     }
 
     protected QueueDispatcher setQueueStatus(QueueStatus queueStatus) {
+        if (this.queueStatus == QueueStatus.TERMINATED && queueStatus != QueueStatus.TERMINATED) {
+            throw new IllegalStateException("Queue status TERMINATED cannot be reverted.");
+        }
         this.queueStatus = queueStatus;
         return this;
     }
@@ -73,7 +79,7 @@ public abstract class QueueDispatcher extends StarkVerticleBase
     @Override
     protected Future<Void> startVerticle() {
         this.lateQueueWorkerPoolManager.initialize(buildQueueWorkerPoolManager());
-        this.queueStatus = QueueStatus.RUNNING;
+        this.setQueueStatus(QueueStatus.RUNNING);
         return beforeQueueStart()
                 .compose(v -> {
                     routine();
@@ -82,6 +88,10 @@ public abstract class QueueDispatcher extends StarkVerticleBase
     }
 
     private void routine() {
+        if (getQueueStatus() == QueueStatus.TERMINATED) {
+            this.getQueueManageLogger().debug(r -> r.setMessage("QueueDispatcher::routine skipped in TERMINATED state"));
+            return;
+        }
         this.getQueueManageLogger().debug(r -> r.setMessage("QueueDispatcher::routine start"));
 
         Future.succeededFuture()
@@ -89,7 +99,7 @@ public abstract class QueueDispatcher extends StarkVerticleBase
               .recover(throwable -> {
                   this.getQueueManageLogger()
                       .debug(r -> r.setMessage("AS IS. Failed to read signal: " + throwable.getMessage()));
-                  if (getQueueStatus() == QueueStatus.STOPPED) {
+                  if (getQueueStatus() == QueueStatus.PAUSED || getQueueStatus() == QueueStatus.TERMINATED) {
                       return Future.succeededFuture(QueueSignal.STOP);
                   } else {
                       return Future.succeededFuture(QueueSignal.RUN);
@@ -105,27 +115,54 @@ public abstract class QueueDispatcher extends StarkVerticleBase
                   }
               })
               .eventually(() -> {
-                  long waitingMs = this.getWaitingPeriodInMsWhenTaskFree();
-                  this.getQueueManageLogger()
-                      .debug(r -> r.setMessage("set timer for next routine after " + waitingMs + " ms"));
-                  getStark().setTimer(waitingMs, timerID -> routine());
+                  scheduleNextRoutine();
                   return Future.succeededFuture();
               })
         ;
     }
 
+    private void scheduleNextRoutine() {
+        if (getQueueStatus() == QueueStatus.TERMINATED) {
+            this.getQueueManageLogger()
+                .debug(r -> r.setMessage("Skip scheduling next routine in TERMINATED state"));
+            return;
+        }
+
+        long waitingMs = this.getWaitingPeriodInMsWhenTaskFree();
+        this.getQueueManageLogger()
+            .debug(r -> r.setMessage("set timer for next routine after " + waitingMs + " ms"));
+
+        long timerID = getStark().setTimer(waitingMs, x -> {
+            nextRoutineTimerIdRef.compareAndSet(x, null);
+            if (getQueueStatus() != QueueStatus.TERMINATED) {
+                routine();
+            }
+        });
+        Long old = nextRoutineTimerIdRef.getAndSet(timerID);
+        if (old != null) {
+            getStark().cancelTimer(old);
+        }
+    }
+
     private Future<Void> whenSignalStopCame() {
         if (getQueueStatus() == QueueStatus.RUNNING) {
-            this.queueStatus = QueueStatus.STOPPED;
+            this.setQueueStatus(QueueStatus.PAUSED);
             this.getQueueManageLogger().info(r -> r.setMessage("Signal Stop Received"));
         }
         return Future.succeededFuture();
     }
 
     private Future<Void> whenSignalRunCame() {
-        this.queueStatus = QueueStatus.RUNNING;
+        if (getQueueStatus() == QueueStatus.TERMINATED) {
+            return Future.succeededFuture();
+        }
+        this.setQueueStatus(QueueStatus.RUNNING);
 
         return getStark().asyncCallRepeatedly(routineResult -> {
+                             if (getQueueStatus() == QueueStatus.TERMINATED) {
+                                 routineResult.stop();
+                                 return Future.succeededFuture();
+                             }
                              if (this.getQueueWorkerPoolManager().isBusy()) {
                                  return getStark().asyncSleep(1_000L);
                              }
@@ -184,7 +221,11 @@ public abstract class QueueDispatcher extends StarkVerticleBase
 
     @Override
     protected Future<Void> stopVerticle() {
-        this.queueStatus = QueueStatus.STOPPED;
+        this.setQueueStatus(QueueStatus.TERMINATED);
+        Long timerId = nextRoutineTimerIdRef.getAndSet(null);
+        if (timerId != null) {
+            getStark().cancelTimer(timerId);
+        }
         return Future.succeededFuture();
     }
 

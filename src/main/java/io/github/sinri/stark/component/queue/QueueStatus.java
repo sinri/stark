@@ -8,5 +8,6 @@ package io.github.sinri.stark.component.queue;
 public enum QueueStatus {
     INIT,
     RUNNING,
-    STOPPED
+    PAUSED,
+    TERMINATED
 }

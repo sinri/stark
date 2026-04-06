@@ -12,8 +12,10 @@ public class StarkSlf4jServiceProvider implements SLF4JServiceProvider {
     public static final String REQUESTED_API_VERSION = "2.0.99";
 
     private final LateObject<ILoggerFactory> lateLoggerFactory = new LateObject<>();
-    private final LateObject<IMarkerFactory> lateMarkerFactory = new LateObject<>();
-    private final LateObject<MDCAdapter> lateMdcAdapter = new LateObject<>();
+//    private final LateObject<IMarkerFactory> lateMarkerFactory = new LateObject<>();
+//    private final LateObject<MDCAdapter> lateMdcAdapter = new LateObject<>();
+    private IMarkerFactory  markerFactory = new BasicMarkerFactory();
+    private MDCAdapter mdcAdapter = new BasicMDCAdapter();
 
     @Override
     public ILoggerFactory getLoggerFactory() {
@@ -22,12 +24,14 @@ public class StarkSlf4jServiceProvider implements SLF4JServiceProvider {
 
     @Override
     public IMarkerFactory getMarkerFactory() {
-        return lateMarkerFactory.get();
+//        return lateMarkerFactory.get();
+        return markerFactory;
     }
 
     @Override
     public MDCAdapter getMDCAdapter() {
-        return lateMdcAdapter.get();
+//        return lateMdcAdapter.get();
+        return  mdcAdapter;
     }
 
     @Override
@@ -38,8 +42,8 @@ public class StarkSlf4jServiceProvider implements SLF4JServiceProvider {
     @Override
     public void initialize() {
         lateLoggerFactory.initialize(new StarkSlf4jLoggerFactory());
-        lateMarkerFactory.initialize(new BasicMarkerFactory());
-        lateMdcAdapter.initialize(new BasicMDCAdapter());
+//        lateMarkerFactory.initialize(new BasicMarkerFactory());
+//        lateMdcAdapter.initialize(new BasicMDCAdapter());
     }
 }
 
