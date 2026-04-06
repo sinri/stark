@@ -71,7 +71,7 @@ public abstract class HTTPService extends StarkVerticleBase {
                 .compose(v0 -> server
                         .requestHandler(router)
                         .exceptionHandler(throwable -> getHttpServerLogger().error(r -> r
-                                .setMessage("KeelHttpServer Exception")
+                                .setMessage("Stark HTTP server exception")
                                 .setThrowable(throwable)))
                         .listen()
                         .compose(httpServer -> {

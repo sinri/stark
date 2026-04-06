@@ -71,7 +71,14 @@ public abstract class QueueTask extends StarkVerticleBase {
               .eventually(() -> {
                   getQueueTaskLogger().info(r -> r.setMessage("QueueTask to undeploy"));
                   notifyBeforeUndeploy();
-                  return undeployMe().onSuccess(done -> this.getQueueWorkerPoolManager().whenOneWorkerEnds());
+                  return undeployMe().onComplete(ar -> {
+                      if (ar.failed()) {
+                          getQueueTaskLogger().error(log -> log
+                                  .setMessage("QueueTask undeploy failed")
+                                  .setThrowable(ar.cause()));
+                      }
+                      this.getQueueWorkerPoolManager().whenOneWorkerEnds();
+                  });
               });
 
         return Future.succeededFuture();
