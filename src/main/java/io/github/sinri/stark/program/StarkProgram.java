@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 public abstract class StarkProgram {
     private final LateObject<Stark> lateStark = new LateObject<>();
 
-    public void delegateMain(String[] args) {
+    public void delegateMain(String[] args) throws InterruptedException {
         List<Future<Void>> serviceEndFutures = new ArrayList<>();
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -114,6 +114,7 @@ public abstract class StarkProgram {
                         });
               })
         ;
+        latch.await();
     }
 
     abstract protected Future<Void> parseArgs(String[] args);
