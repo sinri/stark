@@ -46,12 +46,14 @@ public abstract class CronJobDispatcher extends StarkVerticleBase {
 
     @Override
     protected Future<Void> startVerticle() {
-        int delaySeconds = 61 - CronExpression.parseCalenderToElements(Calendar.getInstance()).second;
-        this.timerID = getStark().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
-            handleEveryMinute(Calendar.getInstance());
-            refreshPlans();
+        return refreshPlans().compose(_ -> {
+            int delaySeconds = 61 - CronExpression.parseCalenderToElements(Calendar.getInstance()).second;
+            this.timerID = getStark().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
+                handleEveryMinute(Calendar.getInstance());
+                refreshPlans();
+            });
+            return Future.succeededFuture();
         });
-        return Future.succeededFuture();
     }
 
     private void handleEveryMinute(Calendar now) {
@@ -93,8 +95,8 @@ public abstract class CronJobDispatcher extends StarkVerticleBase {
         });
     }
 
-    private void refreshPlans() {
-        getStark().sharedData().getLocalLock(
+    private Future<?> refreshPlans() {
+        return getStark().sharedData().getLocalLock(
                 "io.github.sinri.stark.component.sundial.Sundial.refreshPlans"
         ).compose(lock -> {
             return Future.succeededFuture().compose(v -> {
