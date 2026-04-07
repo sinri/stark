@@ -6,6 +6,16 @@ Named After: シュタルク
  
 > フリーレンとフェルンと共に旅をすることになった戦士で、アイゼンの弟子。子供っぽい性格かつ不器用で臆病ながら、優しい心の持ち主で、旅先の人々によく好かれる。高い戦闘力を持ち、パーティーの前衛を務める。
 
+## Maven Repository
+
+```xml
+<dependency>
+    <groupId>io.github.sinri</groupId>
+    <artifactId>stark</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</dependency>
+```
+
 ## Background
 
 Facing the AI Coding tide, the previous work, Framework Keel is not so friendly for AI,
