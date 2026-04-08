@@ -1,0 +1,20 @@
+remote_theme: pages-themes/merlot@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+title: Stark Documentations
+description: Stark is a lightweight Java framework based on Vert.x 5.0.10.
+url: https://sinri.github.io
+baseurl: /stark
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

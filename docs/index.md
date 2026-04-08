@@ -1,7 +1,11 @@
+---
+layout: default
+title: Stark Documentations
+---
 # Stark Documentations
 
 Latest Version: 1.0.0
 
 ## Documentation for Certain Versions
 
-- [1.0.0](./1.0.0/index.md)
+- [1.0.0](./1.0.0/)
